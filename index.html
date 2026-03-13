@@ -364,8 +364,21 @@
       .grid { gap: 5px; }
       .cell { min-height: 72px; padding: 7px; }
 
+      .cell.muted { display: none; }
+      .cell.empty { display: none; }
+
       .tag { font-size: 11px; padding: 2px 7px; }
       .person { font-size: 11px; }
+
+      .task-line {
+        flex-wrap: nowrap;
+      }
+
+      .person {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
 
       .tweet-content { font-size: 11px; min-height: 32px; }
     }
@@ -595,6 +608,7 @@
         const cell = document.createElement('div')
         cell.className = 'cell'
         if (!inMonth) cell.classList.add('muted')
+        if (inMonth && !inRange) cell.classList.add('empty')
         if (isSameDay(day, today)) cell.classList.add('today')
 
         const dateRow = document.createElement('div')

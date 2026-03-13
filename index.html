@@ -111,6 +111,7 @@
     .nav {
       display: flex;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
     .btn {
@@ -313,10 +314,48 @@
     }
 
     @media (max-width: 560px) {
-      body { margin: 14px; }
-      .cell { min-height: 92px; padding: 9px; }
+      body { padding: 12px; }
+      .header { padding: 14px 14px 10px; }
+      .hint { margin: 10px 14px 0; }
+      .calendar { padding: 0 14px 14px; }
+
+      .calendar-header {
+        flex-wrap: wrap;
+        align-items: flex-start;
+      }
+
+      .month-title {
+        font-size: 18px;
+      }
+
+      .btn {
+        padding: 8px 10px;
+        border-radius: 12px;
+      }
+
+      .weekdays { gap: 6px; }
+      .weekday {
+        font-size: 12px;
+        padding: 7px 0;
+        border-radius: 12px;
+      }
+
+      .grid { gap: 6px; }
+      .cell {
+        min-height: 92px;
+        padding: 9px;
+        border-radius: 16px;
+      }
+
       .date-num { font-size: 16px; }
-      .month-title { font-size: 18px; }
+      .date-iso { display: none; }
+
+      .tweet { padding-top: 7px; }
+      .tweet-content {
+        min-height: 44px;
+        padding: 8px 9px;
+        border-radius: 12px;
+      }
     }
   </style>
 </head>

@@ -430,9 +430,7 @@
 
     <div class="hint">
       <div>
-        推文支持你自由填写：
-        <span class="tag tag-tweet">点击每一天的橙色框</span>
-        直接输入“谁做推文 + 备注”，会自动本地保存。
+        推文为固定安排展示，如需新增推文负责人可后续再补充。
       </div>
       <div>
         <span class="tag tag-yue">悦签</span>
@@ -458,11 +456,9 @@
 
   <script>
     const people = ['赖沛霖', '廖雪怡', '梁蕴诗', '张国龙', '符雪菲']
-    const tweetPeople = [...people].reverse()
     const startDate = new Date('2026-03-16T00:00:00')
 
     const weekNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
-    const tweetStoragePrefix = 'schedule_tweet_'
 
     function formatDate(d) {
       const y = d.getFullYear()
@@ -502,14 +498,6 @@
       return (d.getDay() + 6) % 7
     }
 
-    function setLocalTweet(dateKey, text) {
-      localStorage.setItem(tweetStoragePrefix + dateKey, text)
-    }
-
-    function getLocalTweet(dateKey) {
-      return localStorage.getItem(tweetStoragePrefix + dateKey)
-    }
-
     function nextThursday(fromDate) {
       const d = new Date(fromDate)
       const day = d.getDay() // 0-6
@@ -530,7 +518,7 @@
       scheduleByDate[formatDate(startDate)] = {
         fixedType: '',
         fixedPerson: '',
-        tweetText: '推文：1篇（负责人：符雪菲）'
+        tweetPerson: '符雪菲'
       }
 
       // 从开始日期后找到第一个周四
@@ -584,7 +572,6 @@
     const meta = document.getElementById('meta')
     meta.innerHTML =
       '悦签顺序：' + people.join('、') + '<br>' +
-      '推文顺序：' + tweetPeople.join('、') + '<br>' +
       '开始日期：' + formatDate(startDate) + '（周一）<br>' +
       '周四固定：悦签 ↔ 智识小剧场（交替）<br>' +
       '结束日期：' + formatDate(endDate)
@@ -661,7 +648,7 @@
 
         if (inRange) {
           const key = formatDate(day)
-          const item = scheduleByDate[key] || { fixedType: '', fixedPerson: '', tweetText: '' }
+          const item = scheduleByDate[key] || { fixedType: '', fixedPerson: '', tweetPerson: '' }
 
           const tasks = document.createElement('div')
           tasks.className = 'tasks'
@@ -683,55 +670,28 @@
             tasks.appendChild(line)
           }
 
+          if (item.tweetPerson) {
+            const line = document.createElement('div')
+            line.className = 'task-line'
+
+            const tag = document.createElement('span')
+            tag.className = 'tag tag-tweet'
+            tag.textContent = '推文'
+            line.appendChild(tag)
+
+            const person = document.createElement('span')
+            person.className = 'person'
+            person.textContent = item.tweetPerson
+            line.appendChild(person)
+
+            tasks.appendChild(line)
+          }
+
           cell.appendChild(tasks)
 
-          // 推文：可编辑 + localStorage 持久化
-          const tweet = document.createElement('div')
-          tweet.className = 'tweet'
-
-          const titleRow = document.createElement('div')
-          titleRow.className = 'tweet-title'
-
-          const tweetTag = document.createElement('span')
-          tweetTag.className = 'tag tag-tweet'
-          tweetTag.textContent = '推文'
-          titleRow.appendChild(tweetTag)
-
-          const tweetContent = document.createElement('div')
-          tweetContent.className = 'tweet-content'
-          tweetContent.setAttribute('contenteditable', 'true')
-
-          // 优先读本地保存；否则用默认值（仅 3/16 有默认）
-          const local = getLocalTweet(key)
-          if (local === null) {
-            if (item.tweetText) {
-              setLocalTweet(key, item.tweetText)
-              tweetContent.textContent = item.tweetText
-            } else {
-              tweetContent.textContent = ''
-            }
-          } else {
-            tweetContent.textContent = local
-          }
-
-          const initialTweet = tweetContent.textContent.trim()
-          if (item.fixedType || initialTweet) {
+          if (item.fixedType || item.tweetPerson) {
             cell.classList.add('has-content')
           }
-
-          tweetContent.addEventListener('input', function () {
-            setLocalTweet(key, tweetContent.textContent)
-          })
-
-          tweetContent.addEventListener('blur', function () {
-            const text = tweetContent.textContent.trim()
-            tweetContent.textContent = text
-            setLocalTweet(key, text)
-          })
-
-          tweet.appendChild(titleRow)
-          tweet.appendChild(tweetContent)
-          cell.appendChild(tweet)
         }
 
         grid.appendChild(cell)

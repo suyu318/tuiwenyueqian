@@ -524,6 +524,8 @@
       // 从开始日期后找到第一个周四
       let th = nextThursday(startDate)
 
+      let baseEndDate = null
+
       // 结束条件：每人完成过 2 篇“智识小剧场”后结束
       while (true) {
         const person = people[personIndex % people.length]
@@ -533,7 +535,7 @@
           scheduleByDate[formatDate(th)] = {
             fixedType: '悦签',
             fixedPerson: person,
-            tweetText: ''
+            tweetPerson: ''
           }
         } else {
           // 智识小剧场：每人仅 1 次；后续轮到小剧场则改为悦签
@@ -541,20 +543,21 @@
             scheduleByDate[formatDate(th)] = {
               fixedType: '悦签',
               fixedPerson: person,
-              tweetText: ''
+              tweetPerson: ''
             }
           } else {
             scheduleByDate[formatDate(th)] = {
               fixedType: '智识小剧场',
               fixedPerson: person,
-              tweetText: ''
+              tweetPerson: ''
             }
 
             playCount[person] += 1
 
             const done = people.every(p => playCount[p] >= 1)
             if (done) {
-              return { scheduleByDate, endDate: new Date(th), playCount }
+              baseEndDate = new Date(th)
+              break
             }
           }
         }
@@ -562,6 +565,26 @@
         isYueqian = !isYueqian
         th = addDays(th, 7)
       }
+
+      // 2026-05-21 起追加一轮悦签（仅悦签，不包含小剧场）
+      const extraStart = new Date('2026-05-21T00:00:00')
+      let extraEndDate = new Date(extraStart)
+
+      for (let i = 0; i < people.length; i += 1) {
+        const d = addDays(extraStart, i * 7)
+        scheduleByDate[formatDate(d)] = {
+          fixedType: '悦签',
+          fixedPerson: people[i],
+          tweetPerson: ''
+        }
+        extraEndDate = new Date(d)
+      }
+
+      const endDate = baseEndDate && baseEndDate.getTime() > extraEndDate.getTime()
+        ? baseEndDate
+        : extraEndDate
+
+      return { scheduleByDate, endDate, playCount }
     }
 
     const built = buildSchedule()

@@ -164,6 +164,7 @@
       border-radius: 10px;
       background: rgba(249, 250, 251, 0.85);
       border: 1px solid rgba(243, 244, 246, 0.9);
+      white-space: nowrap;
     }
 
     .grid {
@@ -261,12 +262,14 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
     }
 
     .person {
       font-size: 12px;
       color: #374151;
+      white-space: nowrap;
+      word-break: keep-all;
     }
 
     .tweet {
@@ -295,9 +298,10 @@
       background: rgba(255, 247, 237, 0.75);
       border: 1px solid rgba(254, 215, 170, 0.95);
       outline: none;
-      white-space: pre-wrap;
-      word-break: break-word;
+      white-space: nowrap;
+      word-break: keep-all;
       transition: box-shadow 160ms ease, background 160ms ease;
+      overflow-x: auto;
     }
 
     .tweet-content:focus {
@@ -314,7 +318,15 @@
       body { padding: 12px; }
       .header { padding: 14px 14px 10px; }
       .hint { margin: 10px 14px 0; }
-      .calendar { padding: 0 14px 14px; }
+      .calendar {
+        padding: 0 14px 14px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .weekdays, .grid {
+        min-width: 780px;
+      }
 
       .calendar-header {
         flex-wrap: wrap;
@@ -342,6 +354,7 @@
         min-height: 72px;
         padding: 7px;
         border-radius: 16px;
+        min-width: 110px;
       }
 
       .cell.has-content {
@@ -363,7 +376,15 @@
     @media (max-width: 420px) {
       body { padding: 10px; }
       .hint { margin: 10px 12px 0; }
-      .calendar { padding: 0 12px 12px; }
+      .calendar {
+        padding: 0 12px 12px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .weekdays, .grid {
+        min-width: 780px;
+      }
 
       .weekdays { gap: 5px; }
       .weekday { font-size: 11px; padding: 6px 0; }

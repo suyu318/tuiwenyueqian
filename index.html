@@ -342,6 +342,10 @@
         border-radius: 16px;
       }
 
+      .cell.has-content {
+        min-height: 112px;
+      }
+
       .date-num { font-size: 16px; }
       .date-iso { display: none; }
 
@@ -362,7 +366,9 @@
       .weekday { font-size: 11px; padding: 6px 0; }
 
       .grid { gap: 5px; }
-      .cell { min-height: 108px; padding: 8px; }
+      .cell { min-height: 72px; padding: 7px; }
+
+      .cell.has-content { min-height: 128px; }
 
       .cell.muted { display: none; }
       .cell.empty { display: none; }
@@ -477,8 +483,7 @@
     }
 
     function getLocalTweet(dateKey) {
-      const v = localStorage.getItem(tweetStoragePrefix + dateKey)
-      return v === null ? '' : v
+      return localStorage.getItem(tweetStoragePrefix + dateKey)
     }
 
     function nextThursday(fromDate) {
@@ -674,7 +679,21 @@
 
           // 优先读本地保存；否则用默认值（仅 3/16 有默认）
           const local = getLocalTweet(key)
-          tweetContent.textContent = local || item.tweetText || ''
+          if (local === null) {
+            if (item.tweetText) {
+              setLocalTweet(key, item.tweetText)
+              tweetContent.textContent = item.tweetText
+            } else {
+              tweetContent.textContent = ''
+            }
+          } else {
+            tweetContent.textContent = local
+          }
+
+          const initialTweet = tweetContent.textContent.trim()
+          if (item.fixedType || initialTweet) {
+            cell.classList.add('has-content')
+          }
 
           tweetContent.addEventListener('input', function () {
             setLocalTweet(key, tweetContent.textContent)

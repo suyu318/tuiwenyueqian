@@ -362,25 +362,29 @@
       .weekday { font-size: 11px; padding: 6px 0; }
 
       .grid { gap: 5px; }
-      .cell { min-height: 72px; padding: 7px; }
+      .cell { min-height: 108px; padding: 8px; }
 
       .cell.muted { display: none; }
       .cell.empty { display: none; }
 
       .tag { font-size: 11px; padding: 2px 7px; }
-      .person { font-size: 11px; }
+      .person { font-size: 12px; }
 
       .task-line {
         flex-wrap: nowrap;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
       }
 
       .person {
-        overflow: hidden;
-        text-overflow: ellipsis;
+        word-break: keep-all;
+        overflow-wrap: normal;
+        line-break: strict;
         white-space: nowrap;
       }
 
-      .tweet-content { font-size: 11px; min-height: 32px; }
+      .tweet-content { font-size: 12px; min-height: 52px; }
     }
   </style>
 </head>
@@ -497,7 +501,7 @@
       scheduleByDate[formatDate(startDate)] = {
         fixedType: '',
         fixedPerson: '',
-        tweetText: '推文：1篇（推文顺序：' + tweetPeople.join('、') + '）'
+        tweetText: '推文：1篇（负责人：符雪菲）'
       }
 
       // 从开始日期后找到第一个周四

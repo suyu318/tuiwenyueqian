@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>内容排期日历表</title>
+  <style>
+    :root {
+      --bg0: #f6f7fb;
+      --bg1: #eef2ff;
+      --card: rgba(255, 255, 255, 0.92);
+      --line: rgba(17, 24, 39, 0.10);
+      --text: #111827;
+      --muted: #6b7280;
+      --shadow: 0 18px 60px rgba(17, 24, 39, 0.10);
+      --shadow-sm: 0 10px 25px rgba(17, 24, 39, 0.08);
+      --ring: 0 0 0 3px rgba(59, 130, 246, 0.22);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "PingFang SC", "Microsoft YaHei", sans-serif;
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(900px 500px at 10% 0%, rgba(99, 102, 241, 0.18), transparent 55%),
+        radial-gradient(800px 520px at 95% 10%, rgba(59, 130, 246, 0.16), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+      min-height: 100vh;
+      padding: 22px;
+    }
+
+    .app {
+      max-width: 1020px;
+      margin: 0 auto;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      overflow: clip;
+    }
+
+    .header {
+      padding: 18px 18px 12px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.70));
+      backdrop-filter: blur(10px);
+    }
+
+    .title-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      font-size: 18px;
+      margin: 0;
+      letter-spacing: 0.2px;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .meta {
+      font-size: 13px;
+      color: #4b5563;
+      line-height: 1.6;
+      margin: 10px 0 0;
+    }
+
+    .hint {
+      font-size: 13px;
+      margin: 12px 18px 0;
+      padding: 10px 12px;
+      background: rgba(243, 244, 246, 0.7);
+      border: 1px solid rgba(229, 231, 235, 0.9);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .calendar {
+      max-width: 980px;
+      margin: 14px auto 18px;
+      padding: 0 18px 18px;
+    }
+
+    .calendar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 14px 0 10px;
+    }
+
+    .month-title {
+      font-size: 20px;
+      font-weight: 650;
+      letter-spacing: 0.2px;
+    }
+
+    .nav {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid rgba(229, 231, 235, 0.95);
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 13px;
+      cursor: pointer;
+      box-shadow: 0 1px 0 rgba(17, 24, 39, 0.03);
+      transition: transform 120ms ease, box-shadow 160ms ease, border-color 160ms ease;
+    }
+
+    .btn:hover {
+      box-shadow: var(--shadow-sm);
+      border-color: rgba(203, 213, 225, 0.95);
+      transform: translateY(-1px);
+    }
+
+    .btn:focus {
+      outline: none;
+      box-shadow: var(--shadow-sm), var(--ring);
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: 0 1px 0 rgba(17, 24, 39, 0.03);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      margin-bottom: 10px;
+      max-width: 980px;
+    }
+
+    .weekday {
+      font-size: 13px;
+      color: #6b7280;
+      text-align: center;
+      padding: 8px 0;
+      border-radius: 10px;
+      background: rgba(249, 250, 251, 0.85);
+      border: 1px solid rgba(243, 244, 246, 0.9);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      max-width: 980px;
+    }
+
+    .cell {
+      min-height: 110px;
+      border-radius: 14px;
+      border: 1px solid rgba(229, 231, 235, 0.95);
+      background: rgba(255, 255, 255, 0.92);
+      padding: 10px 10px 8px;
+      box-shadow: 0 1px 0 rgba(17, 24, 39, 0.02);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: transform 120ms ease, box-shadow 160ms ease, border-color 160ms ease;
+    }
+
+    .cell:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+      border-color: rgba(203, 213, 225, 0.95);
+    }
+
+    .cell.muted {
+      background: #fbfbfc;
+      color: #9ca3af;
+      border-color: #f3f4f6;
+      box-shadow: none;
+    }
+
+    .cell.today {
+      border-color: #93c5fd;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+    }
+
+    .date-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .date-num {
+      font-size: 18px;
+      font-weight: 650;
+      line-height: 1;
+    }
+
+    .date-iso {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      border: 1px solid;
+      line-height: 1.4;
+    }
+
+    .tag-yue {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border-color: #bfdbfe;
+    }
+
+    .tag-play {
+      background: #ecfdf5;
+      color: #047857;
+      border-color: #a7f3d0;
+    }
+
+    .tag-tweet {
+      background: #fff7ed;
+      color: #c2410c;
+      border-color: #fed7aa;
+    }
+
+    .tasks {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .task-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .person {
+      font-size: 12px;
+      color: #374151;
+    }
+
+    .tweet {
+      margin-top: auto;
+      border-top: 1px dashed #e5e7eb;
+      padding-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .tweet-title {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+    }
+
+    .tweet-content {
+      min-height: 36px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #111827;
+      padding: 6px 8px;
+      border-radius: 10px;
+      background: rgba(255, 247, 237, 0.75);
+      border: 1px solid rgba(254, 215, 170, 0.95);
+      outline: none;
+      white-space: pre-wrap;
+      word-break: break-word;
+      transition: box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .tweet-content:empty::before {
+      content: attr(data-placeholder);
+      color: rgba(107, 114, 128, 0.9);
+    }
+
+    .tweet-content:focus {
+      box-shadow: 0 0 0 2px rgba(251, 146, 60, 0.25);
+      background: rgba(255, 247, 237, 0.95);
+    }
+
+    @media (max-width: 860px) {
+      .cell { min-height: 96px; }
+      .grid, .weekdays { gap: 8px; }
+    }
+
+    @media (max-width: 560px) {
+      body { margin: 14px; }
+      .cell { min-height: 92px; padding: 9px; }
+      .date-num { font-size: 16px; }
+      .month-title { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <div class="title-row">
+        <h1>内容排期日历表</h1>
+        <div class="subtitle">推文 / 智识小剧场 / 悦签</div>
+      </div>
+      <div class="meta" id="meta"></div>
+    </div>
+
+    <div class="hint">
+      <div>
+        推文支持你自由填写：
+        <span class="tag tag-tweet">点击每一天的橙色框</span>
+        直接输入“谁做推文 + 备注”，会自动本地保存。
+      </div>
+      <div>
+        <span class="tag tag-yue">悦签</span>
+        <span class="tag tag-play">智识小剧场</span>
+        <span class="tag tag-tweet">推文</span>
+      </div>
+    </div>
+
+    <div class="calendar">
+      <div class="calendar-header">
+        <div class="month-title" id="monthTitle"></div>
+        <div class="nav">
+          <button class="btn" id="prevMonth" type="button">上个月</button>
+          <button class="btn" id="todayBtn" type="button">回到今天</button>
+          <button class="btn" id="nextMonth" type="button">下个月</button>
+        </div>
+      </div>
+
+      <div class="weekdays" id="weekdays"></div>
+      <div class="grid" id="grid"></div>
+    </div>
+  </div>
+
+  <script>
+    const people = ['赖沛霖', '廖雪怡', '梁蕴诗', '张国龙', '符雪菲']
+    const startDate = new Date('2026-03-16T00:00:00')
+
+    const weekNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+    const tweetStoragePrefix = 'schedule_tweet_'
+
+    function formatDate(d) {
+      const y = d.getFullYear()
+      const m = String(d.getMonth() + 1).padStart(2, '0')
+      const day = String(d.getDate()).padStart(2, '0')
+      return y + '-' + m + '-' + day
+    }
+
+    function isSameDay(a, b) {
+      return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
+    }
+
+    function addDays(d, days) {
+      const copy = new Date(d)
+      copy.setDate(copy.getDate() + days)
+      return copy
+    }
+
+    function monthKey(d) {
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
+    }
+
+    function monthTitleText(d) {
+      return d.getFullYear() + '年' + (d.getMonth() + 1) + '月'
+    }
+
+    function startOfMonth(d) {
+      return new Date(d.getFullYear(), d.getMonth(), 1)
+    }
+
+    function endOfMonth(d) {
+      return new Date(d.getFullYear(), d.getMonth() + 1, 0)
+    }
+
+    // 将 JS 的周日0..周六6 转为 周一0..周日6
+    function mondayFirstDayIndex(d) {
+      return (d.getDay() + 6) % 7
+    }
+
+    function setLocalTweet(dateKey, text) {
+      localStorage.setItem(tweetStoragePrefix + dateKey, text)
+    }
+
+    function getLocalTweet(dateKey) {
+      const v = localStorage.getItem(tweetStoragePrefix + dateKey)
+      return v === null ? '' : v
+    }
+
+    function nextThursday(fromDate) {
+      const d = new Date(fromDate)
+      const day = d.getDay() // 0-6
+      const diff = (4 - day + 7) % 7
+      return addDays(d, diff)
+    }
+
+    function buildSchedule() {
+      const playCount = {}
+      for (const p of people) playCount[p] = 0
+
+      let personIndex = 0
+      let isYueqian = true // 周四内容：悦签 ↔ 智识小剧场（交替），这里从“悦签”开始
+
+      const scheduleByDate = {}
+
+      // 3/16 推文：当天 1 篇（默认写在推文列，负责人留空，方便你改）
+      scheduleByDate[formatDate(startDate)] = {
+        fixedType: '',
+        fixedPerson: '',
+        tweetText: '推文：1篇（可填写负责人）'
+      }
+
+      // 从开始日期后找到第一个周四
+      let th = nextThursday(startDate)
+
+      // 结束条件：每人完成过 2 篇“智识小剧场”后结束
+      while (true) {
+        const person = people[personIndex % people.length]
+        personIndex += 1
+
+        if (isYueqian) {
+          scheduleByDate[formatDate(th)] = {
+            fixedType: '悦签',
+            fixedPerson: person,
+            tweetText: ''
+          }
+        } else {
+          // 智识小剧场：每人仅 1 次；后续轮到小剧场则改为悦签
+          if (playCount[person] >= 1) {
+            scheduleByDate[formatDate(th)] = {
+              fixedType: '悦签',
+              fixedPerson: person,
+              tweetText: ''
+            }
+          } else {
+            scheduleByDate[formatDate(th)] = {
+              fixedType: '智识小剧场',
+              fixedPerson: person,
+              tweetText: ''
+            }
+
+            playCount[person] += 1
+
+            const done = people.every(p => playCount[p] >= 1)
+            if (done) {
+              return { scheduleByDate, endDate: new Date(th), playCount }
+            }
+          }
+        }
+
+        isYueqian = !isYueqian
+        th = addDays(th, 7)
+      }
+    }
+
+    const built = buildSchedule()
+    const scheduleByDate = built.scheduleByDate
+    const endDate = built.endDate
+    const playCount = built.playCount
+
+    const meta = document.getElementById('meta')
+    meta.innerHTML =
+      '人员：' + people.join('、') + '<br>' +
+      '开始日期：' + formatDate(startDate) + '（周一）<br>' +
+      '周四固定：悦签 ↔ 智识小剧场（交替）<br>' +
+      '结束日期：' + formatDate(endDate)
+
+    // 初始化周标题
+    const weekdaysEl = document.getElementById('weekdays')
+    for (const w of weekNames) {
+      const div = document.createElement('div')
+      div.className = 'weekday'
+      div.textContent = w
+      weekdaysEl.appendChild(div)
+    }
+
+    // 月份范围
+    const minMonth = startOfMonth(startDate)
+    const maxMonth = startOfMonth(endDate)
+
+    // 默认显示开始月份
+    let currentMonth = startOfMonth(startDate)
+
+    function clampMonth(d) {
+      if (d.getTime() < minMonth.getTime()) return new Date(minMonth)
+      if (d.getTime() > maxMonth.getTime()) return new Date(maxMonth)
+      return d
+    }
+
+    function addMonths(d, months) {
+      return new Date(d.getFullYear(), d.getMonth() + months, 1)
+    }
+
+    function renderMonth() {
+      currentMonth = clampMonth(currentMonth)
+
+      const monthTitle = document.getElementById('monthTitle')
+      const grid = document.getElementById('grid')
+      monthTitle.textContent = monthTitleText(currentMonth)
+      grid.innerHTML = ''
+
+      const start = startOfMonth(currentMonth)
+      const end = endOfMonth(currentMonth)
+
+      // 日历格子：从当月1号所在周的周一开始补齐
+      const leading = mondayFirstDayIndex(start)
+      const gridStart = addDays(start, -leading)
+
+      // 固定 6 行（42格）更像系统日历
+      const today = new Date()
+
+      for (let i = 0; i < 42; i += 1) {
+        const day = addDays(gridStart, i)
+        const inMonth = day.getMonth() === currentMonth.getMonth()
+        const inRange = day.getTime() >= startDate.getTime() && day.getTime() <= endDate.getTime()
+
+        const cell = document.createElement('div')
+        cell.className = 'cell'
+        if (!inMonth) cell.classList.add('muted')
+        if (isSameDay(day, today)) cell.classList.add('today')
+
+        const dateRow = document.createElement('div')
+        dateRow.className = 'date-row'
+
+        const dateNum = document.createElement('div')
+        dateNum.className = 'date-num'
+        dateNum.textContent = String(day.getDate())
+
+        const dateIso = document.createElement('div')
+        dateIso.className = 'date-iso'
+        dateIso.textContent = inMonth ? '' : monthKey(day)
+
+        dateRow.appendChild(dateNum)
+        dateRow.appendChild(dateIso)
+        cell.appendChild(dateRow)
+
+        if (inRange) {
+          const key = formatDate(day)
+          const item = scheduleByDate[key] || { fixedType: '', fixedPerson: '', tweetText: '' }
+
+          const tasks = document.createElement('div')
+          tasks.className = 'tasks'
+
+          if (item.fixedType === '悦签' || item.fixedType === '智识小剧场') {
+            const line = document.createElement('div')
+            line.className = 'task-line'
+
+            const tag = document.createElement('span')
+            tag.className = 'tag ' + (item.fixedType === '悦签' ? 'tag-yue' : 'tag-play')
+            tag.textContent = item.fixedType
+            line.appendChild(tag)
+
+            const person = document.createElement('span')
+            person.className = 'person'
+            person.textContent = item.fixedPerson
+            line.appendChild(person)
+
+            tasks.appendChild(line)
+          }
+
+          cell.appendChild(tasks)
+
+          // 推文：可编辑 + localStorage 持久化
+          const tweet = document.createElement('div')
+          tweet.className = 'tweet'
+
+          const titleRow = document.createElement('div')
+          titleRow.className = 'tweet-title'
+
+          const tweetTag = document.createElement('span')
+          tweetTag.className = 'tag tag-tweet'
+          tweetTag.textContent = '推文'
+          titleRow.appendChild(tweetTag)
+
+          const tweetContent = document.createElement('div')
+          tweetContent.className = 'tweet-content'
+          tweetContent.setAttribute('contenteditable', 'true')
+          tweetContent.setAttribute('data-placeholder', '点击填写推文（可选）')
+
+          // 优先读本地保存；否则用默认值（仅 3/16 有默认）
+          const local = getLocalTweet(key)
+          tweetContent.textContent = local || item.tweetText || ''
+
+          tweetContent.addEventListener('input', function () {
+            setLocalTweet(key, tweetContent.textContent)
+          })
+
+          tweetContent.addEventListener('blur', function () {
+            const text = tweetContent.textContent.trim()
+            tweetContent.textContent = text
+            setLocalTweet(key, text)
+          })
+
+          tweet.appendChild(titleRow)
+          tweet.appendChild(tweetContent)
+          cell.appendChild(tweet)
+        }
+
+        grid.appendChild(cell)
+      }
+
+      // 按范围禁用切换按钮
+      const prevBtn = document.getElementById('prevMonth')
+      const nextBtn = document.getElementById('nextMonth')
+      prevBtn.disabled = currentMonth.getTime() <= minMonth.getTime()
+      nextBtn.disabled = currentMonth.getTime() >= maxMonth.getTime()
+      prevBtn.style.opacity = prevBtn.disabled ? '0.45' : '1'
+      nextBtn.style.opacity = nextBtn.disabled ? '0.45' : '1'
+    }
+
+    document.getElementById('prevMonth').addEventListener('click', function () {
+      currentMonth = addMonths(currentMonth, -1)
+      renderMonth()
+    })
+
+    document.getElementById('nextMonth').addEventListener('click', function () {
+      currentMonth = addMonths(currentMonth, 1)
+      renderMonth()
+    })
+
+    document.getElementById('todayBtn').addEventListener('click', function () {
+      const today = new Date()
+      const m = startOfMonth(today)
+      currentMonth = clampMonth(m)
+      renderMonth()
+    })
+
+    renderMonth()
+  </script>
+</body>
+</html>

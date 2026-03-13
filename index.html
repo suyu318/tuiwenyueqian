@@ -298,11 +298,6 @@
       transition: box-shadow 160ms ease, background 160ms ease;
     }
 
-    .tweet-content:empty::before {
-      content: attr(data-placeholder);
-      color: rgba(107, 114, 128, 0.9);
-    }
-
     .tweet-content:focus {
       box-shadow: 0 0 0 2px rgba(251, 146, 60, 0.25);
       background: rgba(255, 247, 237, 0.95);
@@ -342,8 +337,8 @@
 
       .grid { gap: 6px; }
       .cell {
-        min-height: 92px;
-        padding: 9px;
+        min-height: 78px;
+        padding: 8px;
         border-radius: 16px;
       }
 
@@ -352,10 +347,27 @@
 
       .tweet { padding-top: 7px; }
       .tweet-content {
-        min-height: 44px;
-        padding: 8px 9px;
+        min-height: 34px;
+        padding: 7px 8px;
         border-radius: 12px;
       }
+    }
+
+    @media (max-width: 420px) {
+      body { padding: 10px; }
+      .hint { margin: 10px 12px 0; }
+      .calendar { padding: 0 12px 12px; }
+
+      .weekdays { gap: 5px; }
+      .weekday { font-size: 11px; padding: 6px 0; }
+
+      .grid { gap: 5px; }
+      .cell { min-height: 72px; padding: 7px; }
+
+      .tag { font-size: 11px; padding: 2px 7px; }
+      .person { font-size: 11px; }
+
+      .tweet-content { font-size: 11px; min-height: 32px; }
     }
   </style>
 </head>
@@ -399,6 +411,7 @@
 
   <script>
     const people = ['赖沛霖', '廖雪怡', '梁蕴诗', '张国龙', '符雪菲']
+    const tweetPeople = [...people].reverse()
     const startDate = new Date('2026-03-16T00:00:00')
 
     const weekNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
@@ -471,7 +484,7 @@
       scheduleByDate[formatDate(startDate)] = {
         fixedType: '',
         fixedPerson: '',
-        tweetText: '推文：1篇（可填写负责人）'
+        tweetText: '推文：1篇（推文顺序：' + tweetPeople.join('、') + '）'
       }
 
       // 从开始日期后找到第一个周四
@@ -524,7 +537,8 @@
 
     const meta = document.getElementById('meta')
     meta.innerHTML =
-      '人员：' + people.join('、') + '<br>' +
+      '悦签顺序：' + people.join('、') + '<br>' +
+      '推文顺序：' + tweetPeople.join('、') + '<br>' +
       '开始日期：' + formatDate(startDate) + '（周一）<br>' +
       '周四固定：悦签 ↔ 智识小剧场（交替）<br>' +
       '结束日期：' + formatDate(endDate)
@@ -639,7 +653,6 @@
           const tweetContent = document.createElement('div')
           tweetContent.className = 'tweet-content'
           tweetContent.setAttribute('contenteditable', 'true')
-          tweetContent.setAttribute('data-placeholder', '点击填写推文（可选）')
 
           // 优先读本地保存；否则用默认值（仅 3/16 有默认）
           const local = getLocalTweet(key)

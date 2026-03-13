@@ -394,8 +394,14 @@
 
       .cell.has-content { min-height: 112px; }
 
-      .cell.muted { display: none; }
-      .cell.empty { display: none; }
+      /* 注意：这里不能用 display:none，否则 CSS Grid 会移除格子导致星期与日期错位 */
+      .cell.muted,
+      .cell.empty {
+        visibility: hidden;
+        border-color: transparent;
+        background: transparent;
+        box-shadow: none;
+      }
 
       .tag { font-size: 11px; padding: 2px 7px; }
       .person { font-size: 12px; }

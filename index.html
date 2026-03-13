@@ -229,6 +229,8 @@
       font-size: 12px;
       border: 1px solid;
       line-height: 1.4;
+      white-space: nowrap;
+      word-break: keep-all;
     }
 
     .tag-yue {
@@ -328,22 +330,22 @@
         border-radius: 12px;
       }
 
-      .weekdays { gap: 6px; }
+      .weekdays { gap: 5px; }
       .weekday {
         font-size: 12px;
         padding: 7px 0;
         border-radius: 12px;
       }
 
-      .grid { gap: 6px; }
+      .grid { gap: 5px; }
       .cell {
-        min-height: 78px;
-        padding: 8px;
+        min-height: 72px;
+        padding: 7px;
         border-radius: 16px;
       }
 
       .cell.has-content {
-        min-height: 112px;
+        min-height: 104px;
       }
 
       .date-num { font-size: 16px; }
@@ -351,9 +353,10 @@
 
       .tweet { padding-top: 7px; }
       .tweet-content {
-        min-height: 34px;
-        padding: 7px 8px;
+        min-height: 28px;
+        padding: 6px 7px;
         border-radius: 12px;
+        font-size: 11px;
       }
     }
 
@@ -365,10 +368,10 @@
       .weekdays { gap: 5px; }
       .weekday { font-size: 11px; padding: 6px 0; }
 
-      .grid { gap: 5px; }
-      .cell { min-height: 72px; padding: 7px; }
+      .grid { gap: 4px; }
+      .cell { min-height: 64px; padding: 6px; }
 
-      .cell.has-content { min-height: 128px; }
+      .cell.has-content { min-height: 112px; }
 
       .cell.muted { display: none; }
       .cell.empty { display: none; }
@@ -390,7 +393,7 @@
         white-space: nowrap;
       }
 
-      .tweet-content { font-size: 12px; min-height: 52px; }
+      .tweet-content { font-size: 12px; min-height: 44px; }
     }
   </style>
 </head>
